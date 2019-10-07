@@ -1,12 +1,14 @@
 (ns dojo.core
   (:require
+   [io.pedestal.http :as http]
+   [io.pedestal.http.route :as route]
    [com.stuartsierra.component :as component]
    [datomic.api :as d]))
 
-(def uri "datomic:mem:/dojo")
+(defn respond-hello [request]
+  {:status 200, :body "Hello, world!"})
 
-{:show/name "Rock in Rio"
- :show/date #inst "2019-01-01"}
+(def uri "datomic:mem:/dojo")
 
 (def schema
   [{:db/ident :show/name
@@ -30,7 +32,34 @@
   (stop [this]
     (d/delete-database uri)))
 
+(def system (atom nil))
+
+(def system-map
+  (component/system-map
+   :db (map->Datomic {:uri uri, :schema schema})))
+
+(defn start []
+  (reset! system (component/start-system system-map)))
+
+(defn stop []
+  (swap! system component/stop-system))
+
 (comment
+
+  @thing
+
+  (reset! thing 1)
+
+  (swap! thing - 10)
+
+  (- atual 10)
+
+  (:conn (:db @system))
+
+  (start)
+
+  (stop)
+
 
   (d/delete-database uri)
 
