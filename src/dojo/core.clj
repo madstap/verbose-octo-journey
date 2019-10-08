@@ -30,15 +30,45 @@
 
   (deref system)
 
-  (d/transact conn schema)
+  @(d/transact
+    conn
+    [{:show/id 1
+      :show/name "Rock in Rio"
+      :show/date #inst "2019-01"
+      :show/set {:set/stage "mundo"
+                 :set/band "secos"
+                 :set/start #inst "2019-01-01T18:00"}}
 
-  (d/transact conn
-              [{;; :show/id 1
-                :show/name "Rock in Rio"
-                :show/date #inst "2019-01-01"}])
+     {:db/id "mundo"
+      :stage/name "Palco mundo"}
+
+     {:db/id "secos"
+      :band/name "Secos e molhados"}])
+
   )
 
 (comment
+
+  {:person/name "fulano"
+   :person/age 30}
+
+  {:person/name "ciclano"
+   :person/age 10
+   :person/parent 123}
+
+  {:db/ident :person/parent
+   :db/valueType :db.type/ref
+   :db/cardinality :db.cardinality/many}
+
+
+  [[123 :person/name "fulano" 456 true]
+   [123 :person/age 30 456 true]
+
+   [321 :person/name "ciclano" 789 true]
+   [321 :person/age 10 789 true]
+   [321 :person/parent 123 789 true]]
+
+
   ;; query
 
   (d/q '{:find  [?e]
@@ -55,8 +85,15 @@
        (d/db conn)
        "Rock in Rio")
 
-  (d/q '{:find  [(pull ?e [:show/name :show/id])]
-         :in    [$ $other-db ?name]
-         :where [[?e :show/name ?name]]}
+  (d/q '{:find  [(pull ?e [:show/name
+                           :show/id
+                           {:show/set
+                            [{:set/band [:band/name]}]}])
+                 ?inst]
+         :in    [$ ?name]
+         :where [[?e :show/name ?name ?tx]
+                 [?tx :db/txInstant ?inst]]}
        (d/db conn)
-       "Rock in Rio"))
+       "Rock in Rio")
+
+  )
