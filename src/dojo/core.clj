@@ -1,7 +1,8 @@
 (ns dojo.core
   (:require
-    [com.stuartsierra.component :as component]
-    [datomic.api :as d]))
+   [com.stuartsierra.component :as component]
+   [dojo.server :as server]
+   [datomic.api :as d]))
 
 (def uri "datomic:mem:/dojo")
 
@@ -33,7 +34,9 @@
 
 (def system-map
   (component/system-map
-    :db (map->Datomic {:uri uri, :schema schema})))
+   :db (map->Datomic {:uri uri, :schema schema})
+   :server (-> (server/map->Server {:port 8080})
+               (component/using [:db]))))
 
 (defn start []
   (reset! system (component/start-system system-map)))
