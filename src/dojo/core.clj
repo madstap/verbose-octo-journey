@@ -87,8 +87,8 @@
 
   (d/q '{:find  [(pull ?e [:show/name
                            :show/id
-                           {:show/set
-                            [{:set/band [:band/name]}]}])
+                           *
+                           {:show/set [{:set/band [:band/name ]}]}])
                  ?inst]
          :in    [$ ?name]
          :where [[?e :show/name ?name ?tx]
